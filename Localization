@@ -25,3 +25,27 @@ void loop() {
   }
 }
 //END ENCODER---------------------------------------------------------------------------------------
+//Motor Driver
+int pwmSpeed = 0;
+int m1pin = 9;
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  pinMode(4, OUTPUT);
+  digitalWrite(4, HIGH);
+  pinMode(7, OUTPUT);
+  pinMode(8, OUTPUT);
+  pinMode(m1pin, OUTPUT);
+  pinMode(10, OUTPUT);
+  pinMode(12, INPUT);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  analogWrite(m1pin,100);
+  delay(200);
+  //analogWrite(m1pin,0);
+  //delay(200);
+
+}
