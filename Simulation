@@ -1,1 +1,97 @@
 // This is the code for simulation control
+
+// Currently not in working condition!!!
+
+#include <Encoder.h> // The encoder library comes in handy for this project
+
+
+// Define some PINs for the encoder
+#define ENCODER_PIN_A 2
+#define ENCODER_PIN_B 5
+
+
+// Define some PINs for the motor
+#define PWM_OUTPUT_PIN 9
+#define PI_CONSTANT 3.1415926536
+// Define some constants for the PID Controller
+
+#define PWM_BOUND 255
+
+// Encoder variables
+long motorPos = 0;
+double angularPos = 0;
+int N = 3200; //Counts per revolution
+// PWM variables
+int pwmSpeed = 0;
+double desiredPosition = 3.1415926536;
+double currentPosition = 0;
+double error = 0;
+double samplingTime = 0;
+double currentTime = 0;
+double integrator = 0;
+int controlSignal = 0;
+
+ // Constants obtained from MATLAB simulations
+const double Kp = 0.2274788;
+const double Ki = 0.0517371;
+
+
+// Setup encoder - pins 2 (interrupt) and 5 (no interrupt)
+Encoder motorEnc(ENCODER_PIN_A, ENCODER_PIN_B);
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  pinMode(4, OUTPUT);
+  digitalWrite(4, HIGH);
+  pinMode(7, OUTPUT);
+  pinMode(8, OUTPUT);
+  pinMode(PWM_OUTPUT_PIN, OUTPUT);
+  pinMode(10, OUTPUT);
+  pinMode(12, INPUT);
+}
+
+void loop() {
+  // Read position
+  motorPos = motorEnc.read();
+  //Find current angular position
+  angularPos = 2*PI*(double)motorPos/(double)N;
+
+   //Serial.println(angularPos);
+  //Mechanism to reset position to zero - https://www.pjrc.com/teensy/td_libs_Encoder.html#optimize
+  //Looks for anything in the serial monitor, if there is something, write zero to encoder
+  if (Serial.available()) {
+    Serial.read();
+    Serial.println("Reset position to zero");
+    motorEnc.write(0);
+  }
+  currentTime = millis();
+  //PIDController();
+}
+
+
+void PIDController(){
+
+  currentPosition = angularPos;
+  error = desiredPosition - currentPosition;
+
+
+
+  integrator = integrator + error * (samplingTime);
+  controlSignal = error * Kp + integrator * Ki;
+
+  
+  Serial.println(integrator);
+  if (abs(controlSignal) > PWM_BOUND)
+  {
+    controlSignal = constrain(controlSignal, -1, 1) * PWM_BOUND;
+    error = constrain (error, -1, 1) * min(abs(error), PWM_BOUND/Kp);
+  }
+  controlSignal = abs(controlSignal);
+  digitalWrite(7, HIGH);
+  analogWrite(PWM_OUTPUT_PIN, controlSignal);
+
+  samplingTime = millis() - currentTime;
+  currentTime = millis();
+
+}
