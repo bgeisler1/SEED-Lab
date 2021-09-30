@@ -1,20 +1,25 @@
 //Localization code for Mini Project
 //ENCODER--------------------------------------------------------------------------------------------
-double angularPos
+#include <Encoder.h>
+
 //Counts per revolution
-int N = 64
+int N = 3200;
+long motorPos;
+double angularPos = 0;
+// Setup encoder - pins 2 (interrupt) and 5 (no interrupt)
+Encoder motorEnc(5,2);
+
 void setup() {
-  Serial.begin(9600)
-  long motorPos;
-  // Setup encoder - pins 2 (interrupt) and 5 (no interrupt)
-  Encoder motorEnc(2,5);
+  Serial.begin(9600);
+  //pinMode (2, INPUT_PULLUP);
+  //pinMode (5, INPUT_PULLUP);
 }
 
 void loop() {
   // Read position
   motorPos = motorEnc.read();
   //Find current angular position
-  anglularPos = 2*PI*(double)motorPos/(double)N;
+  angularPos = 2*PI*(double)motorPos/(double)N;
   Serial.println(angularPos);
   //Mechanism to reset position to zero - https://www.pjrc.com/teensy/td_libs_Encoder.html#optimize
   //Looks for anything in the serial monitor, if there is something, write zero to encoder
