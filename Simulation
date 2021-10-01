@@ -1,6 +1,5 @@
-// This is the code for simulation control
+// Semi-working design
 
-// Currently not in working condition!!!
 
 #include <Encoder.h> // The encoder library comes in handy for this project
 
@@ -18,23 +17,28 @@
 #define PWM_BOUND 255
 
 // Encoder variables
-long motorPos = 0;
-double angularPos = 0;
+float motorPos = 0;
+float angularPos = 0;
 int N = 3200; //Counts per revolution
 // PWM variables
 int pwmSpeed = 0;
-double desiredPosition = 3.1415926536;
-double currentPosition = 0;
-double error = 0;
-double samplingTime = 0;
-double currentTime = 0;
-double integrator = 0;
+//float desiredPosition = 3.1415926536;
+float desiredPosition = 3.1415926536;
+float currentPosition = 0;
+float error = 0;
+float samplingTime = 0;
+float storedTime = 0;
+float currentTime;
+float integrator = 0;
+float storedIntegrator = 0;
 int controlSignal = 0;
 
  // Constants obtained from MATLAB simulations
-const double Kp = 0.2274788;
-const double Ki = 0.0517371;
+//const float Kp = 0.2274788;
+//const float Ki = 0.0517371;
 
+const float Kp = 0.2274788;
+const float Ki = 0.0517371;
 
 // Setup encoder - pins 2 (interrupt) and 5 (no interrupt)
 Encoder motorEnc(ENCODER_PIN_A, ENCODER_PIN_B);
@@ -65,33 +69,39 @@ void loop() {
     Serial.println("Reset position to zero");
     motorEnc.write(0);
   }
-  currentTime = millis();
-  //PIDController();
+  PIDController();
 }
 
 
 void PIDController(){
 
   currentPosition = angularPos;
+  currentTime = millis();
   error = desiredPosition - currentPosition;
-
-
-
-  integrator = integrator + error * (samplingTime);
-  controlSignal = error * Kp + integrator * Ki;
-
   
-  Serial.println(integrator);
+  samplingTime = currentTime - storedTime;
+  integrator = storedIntegrator + error * (samplingTime);
+  controlSignal = Kp * error + Ki * integrator;
+
+
   if (abs(controlSignal) > PWM_BOUND)
   {
     controlSignal = constrain(controlSignal, -1, 1) * PWM_BOUND;
     error = constrain (error, -1, 1) * min(abs(error), PWM_BOUND/Kp);
+    integrator = (controlSignal - Kp * error) / Ki;
   }
+
+  if (error <= 0.0001)
+  {
+    controlSignal = 0;
+  }
+
+  Serial.println(error);
   controlSignal = abs(controlSignal);
-  digitalWrite(7, HIGH);
+
+
+ 
   analogWrite(PWM_OUTPUT_PIN, controlSignal);
-
-  samplingTime = millis() - currentTime;
-  currentTime = millis();
-
+  storedIntegrator = integrator;
+  storedTime = currentTime;
 }
