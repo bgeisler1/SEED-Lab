@@ -56,5 +56,6 @@ void loop() {
   //delay(200);
 
 }
-//Velocity Calculation
+--------------------------------------------------------------------------
+//Angular Velocity Calculation
 AngVel = (AngNew - AngOld)/(t_new - t_old);
