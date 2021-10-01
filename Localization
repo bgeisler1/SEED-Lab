@@ -11,7 +11,7 @@ long motorPos;
 double angularPos = 0;
 double t = 0;
 double newPos = 0;
-double newAngPis = 0;
+double newAngPos = 0;
 double angVelocity = 0;
 
 // Setup encoder - pins 2 (interrupt) and 5 (no interrupt)
@@ -25,7 +25,7 @@ void setup() {
 
 void loop() {
   //Read time
-  t = millis();
+  t = millis()/1000;
   
   //Take sample
   //Read position
@@ -33,7 +33,7 @@ void loop() {
   //Find current angular position
   angularPos = 2*PI*(double)motorPos/(double)N;
   //Serial.println(angularPos);
-  while(millis()< t + SAMPLE_TIME){
+  while((millis()/1000)< t + SAMPLE_TIME){
     //WAIT
   }
   //Read new position
@@ -41,9 +41,10 @@ void loop() {
   newAngPos = 2*PI*(double)newPos/(double)N;
 
   //Calculate velocity
-  angVelocity = (newPos - motorPos)/SAMPLE TIME;
+  angVelocity = (newAngPos - angularPos)/SAMPLE TIME;
   Serial.print(t);
-  Serial.println(angVelocity);
+  Serial.print(angVelocity);
+  Serial.println(angularPos);
   
   //Mechanism to reset position to zero - https://www.pjrc.com/teensy/td_libs_Encoder.html#optimize
   //Looks for anything in the serial monitor, if there is something, write zero to encoder
