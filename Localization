@@ -1,11 +1,19 @@
 //Localization code for Mini Project
 //ENCODER--------------------------------------------------------------------------------------------
+//Localization code for Mini Project
+//ENCODER--------------------------------------------------------------------------------------------
 #include <Encoder.h>
 
 //Counts per revolution
 int N = 3200;
+const int SAMPLE_TIME = 100;
 long motorPos;
 double angularPos = 0;
+double t = 0;
+double newPos = 0;
+double newAngPis = 0;
+double angVelocity = 0;
+
 // Setup encoder - pins 2 (interrupt) and 5 (no interrupt)
 Encoder motorEnc(5,2);
 
@@ -16,11 +24,27 @@ void setup() {
 }
 
 void loop() {
-  // Read position
+  //Read time
+  t = millis();
+  
+  //Take sample
+  //Read position
   motorPos = motorEnc.read();
   //Find current angular position
   angularPos = 2*PI*(double)motorPos/(double)N;
-  Serial.println(angularPos);
+  //Serial.println(angularPos);
+  while(millis()< t + SAMPLE_TIME){
+    //WAIT
+  }
+  //Read new position
+  newPos = motorEnc.read();
+  newAngPos = 2*PI*(double)newPos/(double)N;
+
+  //Calculate velocity
+  angVelocity = (newPos - motorPos)/SAMPLE TIME;
+  Serial.print(t);
+  Serial.println(angVelocity);
+  
   //Mechanism to reset position to zero - https://www.pjrc.com/teensy/td_libs_Encoder.html#optimize
   //Looks for anything in the serial monitor, if there is something, write zero to encoder
   if (Serial.available()) {
@@ -123,7 +147,6 @@ void setup() {
   
   //If pins change, interrupt
   attachInterrupt(digitalPinToInterrupt(2), rightEncoderISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(3), leftEncoderISR, CHANGE);
 }
 
 void loop() {
@@ -139,16 +162,13 @@ void loop() {
   y_old = y_new;
   t_old = t_new;
   phi_old = phi_new;
-  v_r_old = v_r;
   
-  //Debouncing: if interrupt happened in last 80 ms, do nothing
-  if (rightInterruptTrue){
-    delay(80);
-    rightInterruptTrue = false;
-  }
   if (leftInterruptTrue){
     delay(80);
     leftInterruptTrue = false;
+  }
+  if(!leftInterruptTrue){
+    v_L = 0;
   }
   
   //Prints the velocity in format t   v_L   v_r  for results variable in MATLAB
@@ -165,39 +185,6 @@ void loop() {
   Serial.print(x_new);
   Serial.print("\t");
   Serial.println(y_new);*/
-}
-
-void rightEncoderISR(){
-  //Get current time
-  t_new = (double)millis()/1000;
-  
-  //Test if interrupt happened in last 50 ms
-  if (!rightInterruptTrue){
-    //Get current states of pins
-    aVal = digitalRead(PIN_A_RIGHT);
-    bVal = digitalRead(PIN_B_RIGHT);
-
-    // If pin A is different from pin B, it's turning CW, otherwise CCW
-    if(aVal != bVal){
-      rightEncoderVal++;
-    }
-    else{
-      rightEncoderVal--;
-      rightEncoderVal--;
-    }
-
-    //Find current position
-    rightAngNew = 2*PI*(double)rightEncoderVal/(double)N;
-
-    //Get angular velocity
-    rightAngVel = (rightAngNew - rightAngOld)/ (t_new - t_old);
-
-    //Get velocity
-    v_r = r*rightAngVel;
-
-    //Set interrupt to true for debouncing purposes
-    rightInterruptTrue = true;
-  }
 }
 
 void leftEncoderISR(){
