@@ -57,5 +57,180 @@ void loop() {
 
 }
 --------------------------------------------------------------------------
-//Angular Velocity Calculation
-AngVel = (AngNew - AngOld)/(t_new - t_old);
+//Assignment 2 code to read encoder
+/*
+ * Ben Geisler
+ * SEED Lab
+ * Dual rotary encoder reading, position and velocity calcs
+ * This program reads two rotary encoders using interrupts, adding to a number if turning clockwise, subtracting if counterclockwise.
+ * It then calculates the velocity of the encoders based on a wheel radius of 0.5m and separation distance of 0.1m. 
+ * The left and right wheel velocities are printed out in the serial monitor, which can then be put into a MATLAB variable
+ * and simulated.
+ */
+
+//Pin declarations
+const int PIN_A_RIGHT = 2;
+const int PIN_A_LEFT = 3;
+const int PIN_B_RIGHT = 4;
+const int PIN_B_LEFT = 5;
+//Initialization of variables
+int rightEncoderVal = 0;
+int leftEncoderVal = 0;
+int aVal = 0;
+int bVal = 0;
+bool rightInterruptTrue = false;
+bool leftInterruptTrue = false;
+//Angular pos. and velocity
+double leftAngOld = 0;
+double leftAngNew = 0;
+double leftAngVel = 0;
+double rightAngOld = 0;
+double rightAngNew = 0;
+double rightAngVel = 0;
+//time variables
+double t_old = 0;
+double t_new = 0;
+//counts per rotation
+int N = 3200;
+//wheel radius (r)/separation (b)
+double r = 0.5;
+double b = 0.1;
+//x-y-phi position variables
+double x_new = 0;
+double x_old = 0;
+double y_new = 0;
+double y_old = 0;
+double phi_new = 0;
+double phi_old = 0;
+//velocities
+double v_L;
+double v_r;
+double v_r_old;
+double v_L_old;
+//sample time
+double t = 0;
+
+void setup() {
+  // Setup: baud rate, set pins to pullup, attach interrupts
+  Serial.begin(9600);
+  pinMode (PIN_A_RIGHT, INPUT_PULLUP);
+  pinMode (PIN_B_RIGHT, INPUT_PULLUP);
+  pinMode (PIN_A_LEFT, INPUT_PULLUP);
+  pinMode (PIN_B_LEFT, INPUT_PULLUP);
+
+  //take current time
+  t_old = (double)millis()/1000;
+  
+  //If pins change, interrupt
+  attachInterrupt(digitalPinToInterrupt(2), rightEncoderISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(3), leftEncoderISR, CHANGE);
+}
+
+void loop() {
+  //Get the new values of phi, x, y
+  phi_new = phi_old + (t_new-t_old)*(r/b)*(v_L - v_r);
+  x_new = x_old + (t_new-t_old)*cos(phi_old)*(v_L+v_r)/2;
+  y_new = y_old + (t_new-t_old)*sin(phi_old)*(v_L+v_r)/2;
+  
+  //Update variables for old values
+  leftAngOld = leftAngNew;
+  rightAngOld = rightAngNew;
+  x_old = x_new;
+  y_old = y_new;
+  t_old = t_new;
+  phi_old = phi_new;
+  v_r_old = v_r;
+  
+  //Debouncing: if interrupt happened in last 80 ms, do nothing
+  if (rightInterruptTrue){
+    delay(80);
+    rightInterruptTrue = false;
+  }
+  if (leftInterruptTrue){
+    delay(80);
+    leftInterruptTrue = false;
+  }
+  
+  //Prints the velocity in format t   v_L   v_r  for results variable in MATLAB
+  t = (double)millis()/1000;
+  Serial.print(t,3);
+  Serial.print("\t");
+  Serial.print(v_L,4);
+  Serial.print("\t");
+  Serial.println(v_r,4);
+
+  //Prints the positions as they update - to use, comment out velocity print statements above
+  /*Serial.print(phi_new);
+  Serial.print("\t");
+  Serial.print(x_new);
+  Serial.print("\t");
+  Serial.println(y_new);*/
+}
+
+void rightEncoderISR(){
+  //Get current time
+  t_new = (double)millis()/1000;
+  
+  //Test if interrupt happened in last 50 ms
+  if (!rightInterruptTrue){
+    //Get current states of pins
+    aVal = digitalRead(PIN_A_RIGHT);
+    bVal = digitalRead(PIN_B_RIGHT);
+
+    // If pin A is different from pin B, it's turning CW, otherwise CCW
+    if(aVal != bVal){
+      rightEncoderVal++;
+    }
+    else{
+      rightEncoderVal--;
+      rightEncoderVal--;
+    }
+
+    //Find current position
+    rightAngNew = 2*PI*(double)rightEncoderVal/(double)N;
+
+    //Get angular velocity
+    rightAngVel = (rightAngNew - rightAngOld)/ (t_new - t_old);
+
+    //Get velocity
+    v_r = r*rightAngVel;
+
+    //Set interrupt to true for debouncing purposes
+    rightInterruptTrue = true;
+  }
+}
+
+void leftEncoderISR(){
+  //Get current time
+  t_new = (double)millis()/1000;
+  
+  //Test if interrupt happened in last 50 ms
+  if (!leftInterruptTrue){
+    //Get current states of pins
+    aVal = digitalRead(PIN_A_LEFT);
+    bVal = digitalRead(PIN_B_LEFT);
+
+    // If pin A is different from pin B, it's turning CW, otherwise CCW
+    if(aVal != bVal){
+      leftEncoderVal++;
+    }
+    else{
+      leftEncoderVal--;
+      leftEncoderVal--;
+    }
+
+    //Find current angular position
+    leftAngNew = 2*PI*(double)leftEncoderVal/(double)N;
+
+    //Get angular velocity
+    leftAngVel = (leftAngNew - leftAngOld)/(t_new - t_old);
+
+    //Get velocity
+    v_L = r*leftAngVel;
+
+    //set interrupt to true for debouncing purposes
+    leftInterruptTrue = true;
+
+  }
+  
+}
