@@ -46,6 +46,8 @@ void setup() {
   pinMode(12, INPUT);
 }
 
+
+
 void loop() {
   // put your main code here, to run repeatedly:
   analogWrite(m1pin,100);
@@ -54,3 +56,5 @@ void loop() {
   //delay(200);
 
 }
+//Velocity Calculation
+AngVel = (AngNew - AngOld)/(t_new - t_old);
