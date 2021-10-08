@@ -1,6 +1,9 @@
 GROUP 9
+-
 Robert Schmidt, Charles Heilweil, Jiuzou Zhang, Ben Geisler
+-
 Mini Project
+-
 This folder contains the code that was used to complete the Mini Project. There is some preliminary code in the "Prelim Code" folder,
 but the final codes for the Raspberry Pi and Arduino each have their own file. Below are descriptions of each of the roles.
 
