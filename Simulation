@@ -19,8 +19,8 @@ float angularPos = 0;
 int N = 3200; //Counts per revolution
 // PWM variables
 int pwmSpeed = 0;
-//float desiredPosition = 3.1415926536;
-float desiredPosition = 3.1415926536;
+
+float desiredPosition = PI;
 float currentPosition = 0;
 float error = 0;
 float samplingTime = 0;
@@ -116,6 +116,8 @@ void PIDController(){
   }
 
   controlSignal = abs(controlSignal);
+  
+  // This function block defines the tolerance of error and the corresponding behavior of the controlSignal and Integrator
   
   if  (abs(error) < 0.02)
   {
