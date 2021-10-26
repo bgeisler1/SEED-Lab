@@ -26,7 +26,7 @@ The controller is used to control the speed and position. This also keeps extern
 #define DELAY 5 
 #define RADII 7.3  // This specifies the radius of the wheel in centimeters
 #define DISTANCE 24.45
-#define PWM_WAVES_PER_VOLT  36.43  // This value is given by 255/SUPPLY_VOLTAGE
+#define PWM_WAVES_PER_VOLT  31.8750  // This value is given by 255/SUPPLY_VOLTAGE
 
 #define KpRho 16.94
 #define KiRho 333.657977806759
@@ -46,6 +46,8 @@ The controller is used to control the speed and position. This also keeps extern
 #define KpPosition 16.180293597136
 #define KdPosition 2.63548543922997
 
+int angleFlag = 1;
+
 // Define some parameters for the loop
 int number = 0; 
 int state = 0; 
@@ -60,7 +62,6 @@ int N = 3200; //Counts per revolution
 // PWM variables 
 int pwmSpeed = 0; 
 //Set position here 
-float desiredPosition = PI; 
 float currentPosition_L = 0; 
 float currentPosition_R = 0;
 
@@ -77,8 +78,8 @@ float storedErrorOfTheta = 0;
 float D = 0;
 float desiredRhoDot = 0;
 float desiredPhiDot = 0;
-float desiredRho = 0;
-float desiredPhi = (PI/2);
+float desiredRho = 3;
+float desiredPhi = PI;
 //float desiredPhiDot = (PI/3)*1.642669135326063;
 float absOfangularPos_R = 0;
 float currentRho = 0;
@@ -128,12 +129,9 @@ void setup() {
   pinMode(13, OUTPUT); 
 // start serial for output 
   Serial.begin(9600);  
-  
-  /* initialize i2c as slave 
-  Wire.begin(SLAVE_ADDRESS); 
-  // define callbacks for i2c communication 
-  Wire.onReceive(receiveData); 
-  Wire.onRequest(sendData); */
+
+  desiredRho = (desiredRho*0.3048) - 0.04;
+  desiredPhi = desiredPhi*1.03;
 
 //Set the pins as outputs 
   pinMode(4, OUTPUT); 
@@ -161,40 +159,27 @@ void loop() {
 
 
   /* This chunk of code is designed to perform the first step experiment to find the transfer function of Grho
-
   digitalWrite(7, LOW); // -
   digitalWrite(8, LOW); // -
-
   analogWrite(PWM_OUTPUT_PIN_R, 102);
   analogWrite(PWM_OUTPUT_PIN_L, 102);
-
-
   time_now = millis(); 
-
-
   while(millis() < time_now + DELAY){ 
     
     //wait approx. [period] ms 
     motorPos_R = motorEncR.read(); 
     motorPos_L = motorEncL.read();
-
     angularPos_R = 2 * PI * (double)motorPos_R / (double)N;
     angularPos_L = 2 * PI * (double)motorPos_L / (double)N;
-
     //Calculate angular velocities
     angular_velocity_R = (angularPos_R - recorded_position_R)/(time_now/1000 - recorded_time/1000); 
     angular_velocity_L = (angularPos_L - recorded_position_L)/(time_now/1000 - recorded_time/1000);
-
     instanteousForwardVelocity = RADII/100 * (angular_velocity_R + angular_velocity_L)/2;
     } 
   
-
   recorded_position_L = angularPos_L;
   recorded_position_R = angularPos_R;
-
   recorded_time = time_now;
-
-
   Serial.print((time_now+ DELAY)/1000); 
   Serial.print("\t"); 
   Serial.println(instanteousForwardVelocity); */
@@ -249,13 +234,11 @@ void loop() {
  //The block below calculates the angular position and velocity of the wheel, which was used for step response simulation 
   /*analogWrite(PWM_OUTPUT_PIN, PWM_BOUND); 
     time_now = millis(); 
-
 //Forced sampling time to get more accurate data 
     while(millis() < time_now + DELAY){ 
         //wait approx. [period] ms 
         motorPos = motorEnc.read(); 
         angularPos = 2*PI*(double)motorPos/(double)N; 
-
 //Calculate angular velocity 
         angular_velocity = (angularPos - recorded_position)/(time_now/1000 - recorded_time/1000); 
     } 
@@ -277,6 +260,8 @@ void loop() {
     Serial.println("Reset position to zero"); 
     motorEnc.write(0); 
   } */
+    //analogWrite(PWM_OUTPUT_PIN_R, 128);
+    //analogWrite(PWM_OUTPUT_PIN_L, 128);
   
  //Run the controller – turns wheel to specified position 
   PIDController(); 
@@ -345,59 +330,75 @@ void PIDController()
   controlSignal_R = abs(controlSignal_R);
   controlSignal_L = abs(controlSignal_L);
 
-/*
-  if (abs(distanceError) < 0.03)
-  {
-  analogWrite(PWM_OUTPUT_PIN_R, 0);
-  analogWrite(PWM_OUTPUT_PIN_L, 0); 
+  if(angleFlag == 0){
+    Serial.print("MOVING FORWARD    ");
+    if (abs(distanceError) < 0.03)
+    {
+    Serial.print("stopped    ");
+    analogWrite(PWM_OUTPUT_PIN_R, 0);
+    analogWrite(PWM_OUTPUT_PIN_L, 0); 
+    }
+    else if (distanceError >= 0)
+    {
+    Serial.print("Running high    ");
+    digitalWrite(7, HIGH); //+
+    digitalWrite(8, HIGH); // -
+    analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.50);
+    analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.50);
+    } else 
+    {
+    Serial.print("Running high    ");
+    digitalWrite(7, LOW); //+
+    digitalWrite(8, LOW); // -
+    analogWrite(PWM_OUTPUT_PIN_R, 40);
+    analogWrite(PWM_OUTPUT_PIN_L, 40);
+    }
   }
-  else if (distanceError >= 0)
-  {
-  digitalWrite(7, HIGH); //+
-  digitalWrite(8, HIGH); // -
-  analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.50);
-  analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.50);
-  } else 
-  {
-  digitalWrite(7, LOW); //+
-  digitalWrite(8, LOW); // -
-  analogWrite(PWM_OUTPUT_PIN_R, 40);
-  analogWrite(PWM_OUTPUT_PIN_L, 40);
-  }
-*/
-  digitalWrite(7, HIGH); //+
-  digitalWrite(8, LOW); // -
+
+//
+
+  //digitalWrite(7, HIGH); //+
+  //digitalWrite(8, LOW); // -
 
   
-  if (abs(positionError) < 0.05)
+  if (abs(positionError) < 0.05 && angleFlag == 1)
   {
+  Serial.print("Stopping turning...    ");
   analogWrite(PWM_OUTPUT_PIN_R, 0);
   analogWrite(PWM_OUTPUT_PIN_L, 0); 
+  angleFlag = 0;
   }
-  else if (positionError >= 0)
+  else if (positionError >= 0 && angleFlag == 1)
   {
+  Serial.print("Turning...   ");
   digitalWrite(7, HIGH); //+
   digitalWrite(8, LOW); // -
-  analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.50);
-  analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.50);
-  } else 
+  analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.40);
+  analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.40);
+  angleFlag = 1;
+  } else if(positionError < -0.05 && angleFlag == 1)
   {
+  Serial.print("Turning in reverse   ");
   digitalWrite(7, LOW); //+
   digitalWrite(8, HIGH); // -
   analogWrite(PWM_OUTPUT_PIN_R, 40);
   analogWrite(PWM_OUTPUT_PIN_L, 40);
+  angleFlag = 1;
   }
 
 
-  Serial.print(currentTime/1000);
+  Serial.print(angleFlag);
   Serial.print("\t"); 
-  Serial.print(distanceError); 
+  Serial.print(currentRho); 
   Serial.print("\t"); 
-  Serial.println(positionError);
+  Serial.print(positionError);
+  Serial.print("\t"); 
+  Serial.print(controlSignal_R);
+  Serial.print("\t"); 
+  Serial.println(controlSignal_L);
   //Serial.print("\t"); 
   //Serial.println(); 
   storedTime = currentTime;
   storedIntegrator = integrator;
   storedIntegrator1 = integrator1;
 }
-  
