@@ -1,10 +1,13 @@
 /* 
 Arduino Code Demo 1 - Group 9
 Ben Geisler, Jiuzou Zhang, Robert Schmidt 
-This code takes inputs from the Pi in the form of a digit, converts it into an angular position, and turns the wheel using a proportional-integral controller. 
-This code uses the encoder library to read the position of the encoder, so the controller can determine the current position in relation to the actual position. 
-The controller is used to control the speed and position. This also keeps external disturbances from causing error in the location. 
-*/ 
+
+The basic setup of this code is to convert desired distances/angles into the corresponding speeds using the outer loop PD controller, which will set specified
+speeds and translate the values into voltage readings and then PWM waves using the inner loop P controller. The outer and inner loop controllers were modeled
+using the simulink models and transfer function identifications by setting up the step experiments with decoupling effects. But nonetheless the speeds were
+scaled down using a custom percentage factor in order to reduce the translational and rotational inertiæ. The case statement also helps to set the order of rotation
+and moving forwards. Sometimes the two controllers of distance and angle need to run simulateneously but at other times they need to be decoupled for more accuracy.
+*/
 
 #include <Encoder.h> // The encoder library comes in handy for this project 
 #include <Wire.h> 
