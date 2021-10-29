@@ -25,6 +25,7 @@ ive is to form up an algorithm that not only move the drone to the desired posit
 ---------------------------------------------------------------------------------------------------------------
 Computer Vision
 --
-
+The idea behind computer vision was to be able to recognize blue painter's tape and assign the angle of the tape 
+and the camera to an Export Variable that system integration outputs to an LCD scren.
 ---------------------------------------------------------------------------------------------------------------
 System Integration
