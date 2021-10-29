@@ -1,9 +1,10 @@
 # This code takes a video continuously, 
-# looks for yellow, isolates yellow with a mask, 
-# displays yellow shape by itself continuously 
+# looks for blue, isolates blue with a mask, 
+# displays blue shape by itself continuously 
 # and finds center of shape and displays center as well as the location 
-# of the center of the yellow and angle needed to be facing the shape. 
-# Also finds quadrant of hexagon and shares information with an Arduino. 
+# of the center of the blue and angle needed to be facing the shape. 
+# Also finds quadrant of tape and shares information with an Arduino.
+# This code also outputs an angle to an LCD screen.
 
  # defining and initializing the export variable 
 
@@ -25,7 +26,7 @@ bus = smbus.SMBus(1)
 # This is the address we setup in the Arduino Program 
 #address = 0x04
 
- #LCD display 
+# LCD display 
 # Modify this if you have a different sized Character LCD 
 lcd_columns = 16 
 lcd_rows = 2 
@@ -36,12 +37,12 @@ i2c = board.I2C()  # uses board.SCL and board.SDA
  # Initialise the LCD class 
 lcd = character_lcd.Character_LCD_RGB_I2C(i2c, lcd_columns, lcd_rows) 
 
-#this function defines how to write number 
+# this function defines how to write number but is not used in this demo
 #def writeNumber(value): 
 #    bus.write_byte(address, value) 
 #    return -1 
     
-#this function defines how to read number  
+# this function defines how to read number but is not used in this demo
 #def readNumber(address): 
 #    number = bus.read_byte(address) 
 #    return number 
@@ -76,17 +77,17 @@ while(v.isOpened()):
         hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV) 
         gr = cv.cvtColor(frame, cv.COLOR_BGR2GRAY) 
  
-        # defining yellow and mask as well as resulting isolated shape plus testing some other ranges
-        #yellow
+        # defining color and mask as well as resulting isolated shape plus testing some other ranges
+# yellow
         #lower = np.array([15, 100, 100], dtype = "uint8") 
         #upper = np.array([30, 255, 255], dtype = "uint8") 
-#blue 1
+# blue 1 
         #lower = np.array([50, 50, 50], dtype = "uint8")
         #upper = np.array([130, 255, 255], dtype = "uint8")
-#blue 2        
+# blue 2        
         lower = np.array([95, 100, 20], dtype = "uint8")
         upper = np.array([130, 255, 255], dtype = "uint8")
-
+# Experimental
         #lower = np.array([90, 50, 70], dtype = "uint8") 
         #upper = np.array([128, 255, 255], dtype = "uint8")  
         #lower = np.array([100, 150, 0], dtype = "uint8") 
@@ -101,6 +102,8 @@ while(v.isOpened()):
         img_gray = cv.morphologyEx(img_gray, cv.MORPH_OPEN, kernal)
         img_gray = cv.morphologyEx(img_gray, cv.MORPH_CLOSE, kernal)
         thresh, binary_img = cv.threshold(img_gray, thresh = 0, maxval = 255, type = cv.THRESH_BINARY + cv.THRESH_OTSU)
+        
+        # Anything commenteded out in this section is from playing around with different methods and orders that may be used in the next Demo.
         
         #ret, thresh = cv.threshold (img_gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
         #opening1 = cv.morphologyEx(output, cv.MORPH_OPEN, kernal)
@@ -137,7 +140,7 @@ while(v.isOpened()):
                 rv.write(output) 
                 print("Center of X: '{}'".format(round(My['m10'] / My['m00']))) 
                 print("Center of Y: '{}'".format(round(My['m01'] / My['m00']))) 
-# Making case statements to find which quadrant the center of the yellow hexagon is in and assigning it to the  
+# Making case statements to find which quadrant the center of the Blue tape is in and assigning it to the  
 # export variable.                 
 
                 if (round(My['m10'] / My['m00']) > 320) and (round(My['m01'] / My['m00']) < 240): 
@@ -184,7 +187,7 @@ while(v.isOpened()):
         
    # writeNumber(exportVariable) 
 
-    # Set LCD color to red 
+    # Set LCD output 
     while True: 
         lcd.message = "Angle: %s"%(exportVariable) 
         break 
