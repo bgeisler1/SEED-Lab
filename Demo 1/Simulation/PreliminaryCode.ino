@@ -26,31 +26,29 @@ The controller is used to control the speed and position. This also keeps extern
 #define DELAY 5 
 #define RADII 7.3  // This specifies the radius of the wheel in centimeters
 #define DISTANCE 24.45
-#define PWM_WAVES_PER_VOLT  31.8750  // This value is given by 255/SUPPLY_VOLTAGE
+#define PWM_WAVES_PER_VOLT  36.43  // This value is given by 255/SUPPLY_VOLTAGE
 
+//Controller values for velocity control
 #define KpRho 16.94
 #define KiRho 333.657977806759
 #define KpPhi 4.22293708172003
-//#define KpPhi 5.91034386294536
-//#define KiPhi 171.467271662104
 
-//#define KpDistance 44.5492088875086
-//#define KdDistance 1.88165512919462
-
+//Controller values for position control
 #define KpDistance 3.492088875086
 #define KdDistance 1.88165512919462
-
-//#define KpPosition 165.180293597136
-//#define KdPosition 2.63548543922997
 
 #define KpPosition 16.180293597136
 #define KdPosition 2.63548543922997
 
-int angleFlag = 1;
+//States for FSM
+#define DRIVE_FORWARD 0
+#define TURN 1
+
+//FSM state value
+int state;
 
 // Define some parameters for the loop
 int number = 0; 
-int state = 0; 
 
 // Encoder variables 
 float motorPos_L = 0; 
@@ -59,8 +57,6 @@ float angularPos_L = 0;
 float angularPos_R = 0; 
 int N = 3200; //Counts per revolution 
 
-// PWM variables 
-int pwmSpeed = 0; 
 //Set position here 
 float currentPosition_L = 0; 
 float currentPosition_R = 0;
@@ -70,6 +66,7 @@ float angular_velocity_R = 0;
 float recorded_position_L = 0; 
 float recorded_position_R = 0; 
 
+//Test parameters
 float instanteousForwardVelocity = 0;
 float instanteousAngularVelocity = 0;
 float currentTheta = 0;
@@ -78,9 +75,11 @@ float storedErrorOfTheta = 0;
 float D = 0;
 float desiredRhoDot = 0;
 float desiredPhiDot = 0;
-float desiredRho = 3;
-float desiredPhi = PI;
-//float desiredPhiDot = (PI/3)*1.642669135326063;
+
+//Desired values
+float desiredRho = 2;
+float desiredPhi = -4.248;
+
 float absOfangularPos_R = 0;
 float currentRho = 0;
 float currentPhi = 0;
@@ -104,7 +103,7 @@ float positionDerivativeError = 0;
 float storedDistanceError = 0;
 float storedPositionError = 0;
 
-//Error to check how close wheel is to desirec position 
+//Error to check how close wheel is to desired position 
 float error = 0; 
 
 //Sampling time for loop 
@@ -129,10 +128,9 @@ void setup() {
   pinMode(13, OUTPUT); 
 // start serial for output 
   Serial.begin(9600);  
-
-  desiredRho = (desiredRho*0.3048) - 0.04;
-  desiredPhi = desiredPhi*1.03;
-
+  desiredRho = (desiredRho*0.3048) - 0.03;
+  desiredPhi = desiredPhi * 1.07;
+  
 //Set the pins as outputs 
   pinMode(4, OUTPUT); 
   pinMode(7, OUTPUT); 
@@ -145,46 +143,13 @@ void setup() {
   pinMode(12, INPUT); 
  //Pin 4 write high for motor drive 
   digitalWrite(4, HIGH); 
+  state = TURN;
+
 } 
 
 void loop() { 
-
-  //delay(100); 
-  // callback for received data 
-  //Calculate position based on the input quadrant 
   
   //desiredPosition = number * PI / 2;
-
-  //Find current angular position using encoder library 
-
-
-  /* This chunk of code is designed to perform the first step experiment to find the transfer function of Grho
-  digitalWrite(7, LOW); // -
-  digitalWrite(8, LOW); // -
-  analogWrite(PWM_OUTPUT_PIN_R, 102);
-  analogWrite(PWM_OUTPUT_PIN_L, 102);
-  time_now = millis(); 
-  while(millis() < time_now + DELAY){ 
-    
-    //wait approx. [period] ms 
-    motorPos_R = motorEncR.read(); 
-    motorPos_L = motorEncL.read();
-    angularPos_R = 2 * PI * (double)motorPos_R / (double)N;
-    angularPos_L = 2 * PI * (double)motorPos_L / (double)N;
-    //Calculate angular velocities
-    angular_velocity_R = (angularPos_R - recorded_position_R)/(time_now/1000 - recorded_time/1000); 
-    angular_velocity_L = (angularPos_L - recorded_position_L)/(time_now/1000 - recorded_time/1000);
-    instanteousForwardVelocity = RADII/100 * (angular_velocity_R + angular_velocity_L)/2;
-    } 
-  
-  recorded_position_L = angularPos_L;
-  recorded_position_R = angularPos_R;
-  recorded_time = time_now;
-  Serial.print((time_now+ DELAY)/1000); 
-  Serial.print("\t"); 
-  Serial.println(instanteousForwardVelocity); */
-
-  //Similarly, this chunk of code is used to find the transfer function of Gphi
   
   //digitalWrite(7, HIGH); //+
   //digitalWrite(8, LOW); // -
@@ -218,50 +183,7 @@ void loop() {
   recorded_position_R = angularPos_R;
   recorded_time = time_now;
 
-  
-  //Serial.print((time_now+ DELAY)/1000); 
-  //Serial.print("\t");
-  //Serial.print(0.5*PWM_WAVES_PER_VOLT);  
-  //Serial.print("\t"); 
-  //Serial.println(instanteousAngularVelocity); 
-  /*
-  Serial.print((time_now+ DELAY)/1000); 
-  Serial.print("\t");
-  Serial.print(angular_velocity_R);
-  Serial.print("\t");
-  Serial.println(angular_velocity_L);
-  */
- //The block below calculates the angular position and velocity of the wheel, which was used for step response simulation 
-  /*analogWrite(PWM_OUTPUT_PIN, PWM_BOUND); 
-    time_now = millis(); 
-//Forced sampling time to get more accurate data 
-    while(millis() < time_now + DELAY){ 
-        //wait approx. [period] ms 
-        motorPos = motorEnc.read(); 
-        angularPos = 2*PI*(double)motorPos/(double)N; 
-//Calculate angular velocity 
-        angular_velocity = (angularPos - recorded_position)/(time_now/1000 - recorded_time/1000); 
-    } 
-    recorded_time = time_now; 
-    recorded_position = angularPos; 
-  
-//Prints to serial monitor 
-    Serial.print((time_now+ DELAY)/1000); 
-    Serial.print("\t"); 
-    Serial.println(angular_velocity); */ 
 
-//Serial.println(angularPos); 
-  //Mechanism to reset position to zero - https://www.pjrc.com/teensy/td_libs_Encoder.html#optimize 
-  
-
-  /* Looks for anything in the serial monitor, if there is something, write zero to encoder 
-  if (Serial.available()) { 
-    Serial.read(); 
-    Serial.println("Reset position to zero"); 
-    motorEnc.write(0); 
-  } */
-    //analogWrite(PWM_OUTPUT_PIN_R, 128);
-    //analogWrite(PWM_OUTPUT_PIN_L, 128);
   
  //Run the controller – turns wheel to specified position 
   PIDController(); 
@@ -272,16 +194,107 @@ void PIDController()
   currentTime = millis();
   samplingTime = currentTime - storedTime;
 
-  absOfangularPos_R = abs(angularPos_R);
+  absOfangularPos_R = - angularPos_R;
 
   
   currentRho = RADII/100 * (absOfangularPos_R + angularPos_L)/2;
   currentPhi = RADII/100 * (absOfangularPos_R - angularPos_L)/(DISTANCE/100);
+  
+//Controls the distance so it adjusts when it overshoots
 
+  switch(state){
+    case TURN:
+
+  //Checks errors for rho, which is part of the outer control loop
+  distanceError = desiredRho - currentRho;
+  // This line and the line below specifies the derivative part (D) of the outer controller
+  distanceDerivativeError = (distanceError - storedDistanceError)/(samplingTime/1000);
+  desiredRhoDot = KpDistance * distanceError + distanceDerivativeError * KdDistance;
+
+  //Checks errors for phi, which is part of the outer control loop
+  positionError = desiredPhi - currentPhi;
+  // This line and the line below specifies the derivative part (D) of the outer controller
+  positionDerivativeError = (positionError - storedPositionError)/(samplingTime/1000);
+  desiredPhiDot = KpPosition * positionError + positionDerivativeError * KdPosition;
+
+  //Calculations for velocities, which are all done in standard SUI units. No cm's or inches
+  currentRhoDot = RADII/100 * (angular_velocity_R + angular_velocity_L)/2;
+  currentPhiDot = RADII/100 * (angular_velocity_R - angular_velocity_L)/(DISTANCE/100);
+  
+  errorOfRhoDot = desiredRhoDot - currentRhoDot;
+  errorOfPhiDot = desiredPhiDot - currentPhiDot;
+  
+ // The theoretically-usable I portion of the controller, which wa not used in this case
+  integrator =  storedIntegrator + errorOfRhoDot * (samplingTime/1000);
+  integrator1 = storedIntegrator1 + errorOfPhiDot * (samplingTime/1000);
+  
+  // These calculations derive the sum voltage and the differential voltage, which will then be translated
+  deltaV = KpPhi * errorOfPhiDot;
+  // In order to decouple the effects, the drone will not be moving forward when turning
+  sigmaV = 0;
+  
+   // The aforementioned voltages will be translated into the voltages on each motor, denoted as Va1 and Va2
+  Va1 = (sigmaV + deltaV)/2;
+  Va2 = (sigmaV - deltaV)/2;
+  // The voltages will then be translated into the actual PWM waves using the pwm_waves_per_volt constant
+  controlSignal_R = Va1 * PWM_WAVES_PER_VOLT;
+  controlSignal_L = Va2 * PWM_WAVES_PER_VOLT;
+      
+  // These are the constraints for the pwm wave readings, which should never exceed 255 or -255
+  if (abs(controlSignal_R) > PWM_BOUND) 
+  { 
+    controlSignal_R = constrain(controlSignal_R, -1, 1) * PWM_BOUND; 
+    errorOfRhoDot = constrain (errorOfRhoDot, -1, 1) * min(abs(errorOfRhoDot), PWM_BOUND / KpRho); 
+  } 
+  if (abs(controlSignal_L) > PWM_BOUND)
+  {
+    controlSignal_L = constrain(controlSignal_L, -1, 1) * PWM_BOUND;
+    errorOfPhiDot = constrain (errorOfPhiDot, -1, 1) * min(abs(errorOfPhiDot), PWM_BOUND / KpPhi);
+  }
+ // Take the absolute value of the control signals (in pwm waves), if they are not already
+  controlSignal_R = abs(controlSignal_R);
+  controlSignal_L = abs(controlSignal_L);
+  
+ // These if's will determine if the drone will keep moving forward or correct the angular position if it went off due to friction along the way
+      if (abs(positionError) <= 0.05){
+          state = DRIVE_FORWARD;
+          }
+      else{
+            state = TURN;
+        }
+      Serial.print(state);
+      // The tolerance is specified is in t
+      if (abs(positionError) < 0.05)
+      {
+      Serial.print("  Stopping turning...    ");
+      analogWrite(PWM_OUTPUT_PIN_R, 0);
+      analogWrite(PWM_OUTPUT_PIN_L, 0); 
+      
+      }
+      else if (positionError >= 0)
+      {
+      Serial.print("  Turning...   ");
+      digitalWrite(7, HIGH); //+
+      digitalWrite(8, LOW); // -
+      analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.30);
+      analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.30);
+      } else 
+      {
+      Serial.print("  Turning in reverse   ");
+      digitalWrite(7, LOW); //+
+      digitalWrite(8, HIGH); // -
+      analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.30);
+      analogWrite(PWM_OUTPUT_PIN_L, controlSignal_R*0.30);
+      }
+      break;
+      
+    case DRIVE_FORWARD:
+  //Checks errors for rho
   distanceError = desiredRho - currentRho;
   distanceDerivativeError = (distanceError - storedDistanceError)/(samplingTime/1000);
   desiredRhoDot = KpDistance * distanceError + distanceDerivativeError * KdDistance;
 
+  //Checks errors for phi
   positionError = desiredPhi - currentPhi;
   positionDerivativeError = (positionError - storedPositionError)/(samplingTime/1000);
   desiredPhiDot = KpPosition * positionError + positionDerivativeError * KdPosition;
@@ -298,7 +311,6 @@ void PIDController()
   
   sigmaV = KpRho * errorOfRhoDot;
   deltaV = KpPhi * errorOfPhiDot;
-  
   Va1 = (sigmaV + deltaV)/2;
   Va2 = (sigmaV - deltaV)/2;
   
@@ -315,87 +327,44 @@ void PIDController()
     controlSignal_L = constrain(controlSignal_L, -1, 1) * PWM_BOUND;
     errorOfPhiDot = constrain (errorOfPhiDot, -1, 1) * min(abs(errorOfPhiDot), PWM_BOUND / KpPhi);
   }
-  
-  
-  /*
-  if (controlSignal_R > 0)
-  {
-    digitalWrite (8, LOW);
-  } else
-  {
-    digitalWrite (8, HIGH);
-  }
-  */
  
   controlSignal_R = abs(controlSignal_R);
   controlSignal_L = abs(controlSignal_L);
-
-  if(angleFlag == 0){
-    Serial.print("MOVING FORWARD    ");
-    if (abs(distanceError) < 0.03)
-    {
-    Serial.print("stopped    ");
-    analogWrite(PWM_OUTPUT_PIN_R, 0);
-    analogWrite(PWM_OUTPUT_PIN_L, 0); 
-    }
-    else if (distanceError >= 0)
-    {
-    Serial.print("Running high    ");
-    digitalWrite(7, HIGH); //+
-    digitalWrite(8, HIGH); // -
-    analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.50);
-    analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.50);
-    } else 
-    {
-    Serial.print("Running high    ");
-    digitalWrite(7, LOW); //+
-    digitalWrite(8, LOW); // -
-    analogWrite(PWM_OUTPUT_PIN_R, 40);
-    analogWrite(PWM_OUTPUT_PIN_L, 40);
-    }
+      Serial.print(state);
+      if (abs(distanceError) < 0.001)
+      {
+      Serial.print("  stopped    ");
+      analogWrite(PWM_OUTPUT_PIN_R, 0);
+      analogWrite(PWM_OUTPUT_PIN_L, 0); 
+      }
+      else if (distanceError >= 0)
+      {
+      Serial.print("  Running high    ");
+      digitalWrite(7, HIGH); //+
+      digitalWrite(8, HIGH); // -
+      analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.30);
+      analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.30);
+      } else 
+      {
+      Serial.print("  Running low    ");
+      digitalWrite(7, LOW); //+
+      digitalWrite(8, LOW); // -
+      analogWrite(PWM_OUTPUT_PIN_R, 40);
+      analogWrite(PWM_OUTPUT_PIN_L, 40);
+      }
+      break;
+      
+    default:
+    
+      break;
   }
 
-//
-
-  //digitalWrite(7, HIGH); //+
-  //digitalWrite(8, LOW); // -
-
+  Serial.print(currentTime/1000);
+  Serial.print("\t"); 
+  Serial.print(positionError); 
+  Serial.print("\t"); 
+  Serial.println(distanceError);
   
-  if (abs(positionError) < 0.05 && angleFlag == 1)
-  {
-  Serial.print("Stopping turning...    ");
-  analogWrite(PWM_OUTPUT_PIN_R, 0);
-  analogWrite(PWM_OUTPUT_PIN_L, 0); 
-  angleFlag = 0;
-  }
-  else if (positionError >= 0 && angleFlag == 1)
-  {
-  Serial.print("Turning...   ");
-  digitalWrite(7, HIGH); //+
-  digitalWrite(8, LOW); // -
-  analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.40);
-  analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.40);
-  angleFlag = 1;
-  } else if(positionError < -0.05 && angleFlag == 1)
-  {
-  Serial.print("Turning in reverse   ");
-  digitalWrite(7, LOW); //+
-  digitalWrite(8, HIGH); // -
-  analogWrite(PWM_OUTPUT_PIN_R, 40);
-  analogWrite(PWM_OUTPUT_PIN_L, 40);
-  angleFlag = 1;
-  }
-
-
-  Serial.print(angleFlag);
-  Serial.print("\t"); 
-  Serial.print(currentRho); 
-  Serial.print("\t"); 
-  Serial.print(positionError);
-  Serial.print("\t"); 
-  Serial.print(controlSignal_R);
-  Serial.print("\t"); 
-  Serial.println(controlSignal_L);
   //Serial.print("\t"); 
   //Serial.println(); 
   storedTime = currentTime;
