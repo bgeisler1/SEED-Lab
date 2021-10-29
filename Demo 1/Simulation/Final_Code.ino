@@ -314,12 +314,14 @@ void PIDController()
  // The theoretically-usable I portion of the controller, which wa not used in this case
   integrator =  storedIntegrator + errorOfRhoDot * (samplingTime/1000);
   integrator1 = storedIntegrator1 + errorOfPhiDot * (samplingTime/1000);
-  
+
+ // sum and delta will be calculated accordingly
   sigmaV = KpRho * errorOfRhoDot;
   deltaV = KpPhi * errorOfPhiDot;
+  // The aforementioned voltages will be translated into the voltages on each motor, denoted as Va1 and Va2
   Va1 = (sigmaV + deltaV)/2;
   Va2 = (sigmaV - deltaV)/2;
-  
+  // The voltages will then be translated into the actual PWM waves using the pwm_waves_per_volt constant
   controlSignal_R = Va1 * PWM_WAVES_PER_VOLT;
   controlSignal_L = Va2 * PWM_WAVES_PER_VOLT;
   
