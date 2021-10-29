@@ -289,23 +289,26 @@ void PIDController()
       break;
       
     case DRIVE_FORWARD:
-  //Checks errors for rho
+  //Checks errors for rho, which is part of the outer control loop
   distanceError = desiredRho - currentRho;
+  // This line and the line below specifies the derivative part (D) of the outer controller
   distanceDerivativeError = (distanceError - storedDistanceError)/(samplingTime/1000);
   desiredRhoDot = KpDistance * distanceError + distanceDerivativeError * KdDistance;
 
-  //Checks errors for phi
+  //Checks errors for phi, which is part of the outer control loop
   positionError = desiredPhi - currentPhi;
+  // This line and the line below specifies the derivative part (D) of the outer controller
   positionDerivativeError = (positionError - storedPositionError)/(samplingTime/1000);
   desiredPhiDot = KpPosition * positionError + positionDerivativeError * KdPosition;
 
-  
+  //Calculations for velocities, which are all done in standard SUI units. No cm's or inches
   currentRhoDot = RADII/100 * (angular_velocity_R + angular_velocity_L)/2;
   currentPhiDot = RADII/100 * (angular_velocity_R - angular_velocity_L)/(DISTANCE/100);
   
   errorOfRhoDot = desiredRhoDot - currentRhoDot;
   errorOfPhiDot = desiredPhiDot - currentPhiDot;
-
+  
+ // The theoretically-usable I portion of the controller, which wa not used in this case
   integrator =  storedIntegrator + errorOfRhoDot * (samplingTime/1000);
   integrator1 = storedIntegrator1 + errorOfPhiDot * (samplingTime/1000);
   
