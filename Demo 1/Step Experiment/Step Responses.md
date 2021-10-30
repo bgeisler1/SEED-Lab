@@ -1,3 +1,9 @@
+Using command:
+
+lot(step1(:,1)-10.39, step1(:,3));
+>> plot(step(:,1)-2.65, step(:,3));
+
+
 
 The image of the step experiment for the angular velocity where the delataV is 1V is shown below:
 
