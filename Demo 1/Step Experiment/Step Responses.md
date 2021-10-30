@@ -8,8 +8,11 @@ Using the first order equation of the system, we may derive the formulae as foll
 Operating At deltaV = 1V
 K = 0.242169811320755
 0.64K = 0.1550
-( 0.06, 0.15)
-( 0.08, 0.19)
+Closest Coordinates:
+(0.06, 0.15)
+(0.08, 0.19)
+
+Linear Interpolation Result:
 (0.0625, 0.155)
 
 σ = 1/0.0625 = 16
@@ -22,9 +25,12 @@ The image of the step experiment for the translational velocity where the sigmaV
 Operating At SigmaV = 1V
 K = 0.07
 0.64K = 0.0448
+
+Closest Coordinates:
 (0.08, 0.04)
 (0.10, 0.06)
 
+Linear Interpolation Result:
 (0.0848, 0.448)
 
 σ = 1/.0848 = 11.79245283
