@@ -21,6 +21,11 @@ Simulation and Control
  and simulink models and then set up certain P/PD controllers for the closed loop situations. The secondary object
 ive is to form up an algorithm that not only move the drone to the desired position but can also adjust the errors 
  that accumulates along the way of the operation.
+ 
+ The final two outer-loop controllers design is shown as follows, one for angular velocity and one for translational velocity:
+ 
+ <img width="1387" alt="image" src="https://user-images.githubusercontent.com/91347870/139518162-8fc1f452-2fff-4c61-be63-bdbf5a7858fa.png">
+
 
 ---------------------------------------------------------------------------------------------------------------
 Computer Vision
