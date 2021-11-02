@@ -36,7 +36,7 @@ control which state the robot is in.
 ---------------------------------------------------------------------------------------------------------------
 Simulation and Control
 --
-The main task for simulation and control is to model the positional and angular positional behavior using MATLAB and simulink models and then set up certain P/PD controllers for the closed loop situations. The secondary objecive is to form up an algorithm that not only move the drone to the desired position but can also adjust the errors that accumulates along the way of the operation.
+The main task for simulation and control is to model the positional and angular positional behavior using MATLAB and simulink models and then set up certain P/PD controllers for the closed loop situations. The secondary objecive is to form up an algorithm that not only movew ths drone to the desired position but can also adjust the errors that accumulates along the way of the operation.
 
 The final two outer-loop controllers design is shown as follows, one for angular velocity and one for translational velocity:
 ![image](https://user-images.githubusercontent.com/91347867/139537859-25ad0891-de43-4ec8-80cd-b12680695392.png)
