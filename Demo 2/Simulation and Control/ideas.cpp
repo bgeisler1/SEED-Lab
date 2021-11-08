@@ -1,3 +1,7 @@
+enum maneuvering {SEARCH_TAPE,CALIBRATE,TURNING,FORWARD,TURN90,REVERSE,CIRCLE,WAIT};
+
+maneuvering maneuveringState = SEARCH_TAPE;
+
 void maneuvering ()
 {
   switch(maneuveringState)
@@ -16,6 +20,7 @@ void maneuvering ()
     }
     break;
     case CALIBRATION:
+    
     break;
 }
 
