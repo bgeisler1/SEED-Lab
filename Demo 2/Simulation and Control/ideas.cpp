@@ -14,6 +14,7 @@ void maneuvering ()
       desiredPhiDot  = 0.1;
       velocityControl();
     }
+    break;
 }
 
 void velocityControl()
@@ -99,3 +100,5 @@ void velocityControl()
       analogWrite(PWM_OUTPUT_PIN_L, 40);
       }
 }
+
+
