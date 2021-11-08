@@ -10,7 +10,8 @@ void maneuvering ()
     }
     else // Hard code the rotational velocity
     {
-      
+      desiredRhoDot  = 0;
+      desiredPhiDot  = 0.1;
     }
 }
 
