@@ -15,6 +15,8 @@ void maneuvering ()
       velocityControl();
     }
     break;
+    case CALIBRATION:
+    break;
 }
 
 void velocityControl()
