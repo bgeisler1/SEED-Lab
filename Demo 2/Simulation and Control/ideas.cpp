@@ -12,6 +12,7 @@ void maneuvering ()
     {
       desiredRhoDot  = 0;
       desiredPhiDot  = 0.1;
+      velocityControl();
     }
 }
 
