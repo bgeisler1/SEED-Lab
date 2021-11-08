@@ -1,0 +1,59 @@
+Ideas to implement demo 2
+1. Check out simulink camera block tutorial - https://web.microsoftstream.com/video/fe2479e4-c437-41c0-81dd-17523dbb633b
+    - Jiuzou and Ben can create a simulation like that (if needed)
+    - Camera will look at the tape and see if it's at the center of a defined refrence line
+    
+    tape-tape-tape-tape-
+                      -tape-tape-
+                              -tape-tape-
+                                      -tape-
+                                            -tape-
+                                                  -tape-
+    reference line -------------------------------------- -tape ----------------------------------------reference line
+                                                              -tape-
+
+2. What we need from the camera is 'phi_s'
+    - Is that the angle the tape is away from center?
+    - If tape is left or right of center, tell robot to move left or right
+    - This could be a single number
+        0 = no tape detected
+        1 = Left of center
+        2 = Right of center
+    - These could be sent to control, so that the robot moves left or right
+        - IDEA: Desired phi = phi_s
+            - Would this correct the robot's angle automatically while it's moving forward?
+                - If so, this could be pretty simple. Theoretically, it would follow the line automatically
+        - Needs to move forward at the same time:
+        
+        if (leftRight == 0){
+            //Stop moving, no tape detected
+            analogWrite(PWM_OUTPUT_PIN_R, 0);
+            analogWrite(PWM_OUTPUT_PIN_L, 0); 
+        }
+        
+        else if (leftRight == 1){
+            //Angle right (turn Clockwise) - NOTE: If we want to have it moving forward, maybe we need to do this some other way
+            //If we write HIGH/LOW, then it will turn in-place. We need to have another way to make it so the control signal
+            //just slows down one wheel, rather than reversing it
+            digitalWrite(7, LOW); //+
+            digitalWrite(8, HIGH); // -
+            
+            //Continue moving
+            analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.30);
+            analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.30);
+        }
+        
+        else if (leftRight == 2){
+            //Angle left (turn CCW) - NOTE: If we want to have it moving forward, maybe we need to do this some other way
+            //If we write HIGH/LOW, then it will turn in-place. We need to have another way to make it so the control signal
+            //just slows down one wheel, rather than reversing it
+            digitalWrite(7, HIGH); //+
+            digitalWrite(8, LOW); // -
+            
+            //Continue moving
+            analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.30);
+            analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.30);   
+        }
+        
+      - Note that the code above could be changed to a FSM, might be more robust and consise
+      - Also, the code above will not work (unless we periodically stop the robot)
