@@ -53,7 +53,7 @@ void velocityControl()
   integrator1 = storedIntegrator1 + errorOfPhiDot * (samplingTime/1000);
 
  // sum and delta will be calculated accordingly
-  sigmaV = KpRho * errorOfRhoDot;
+  sigmaV = 0; // No sum voltage will be applied as it shoukd be just turning
   deltaV = KpPhi * errorOfPhiDot;
   // The aforementioned voltages will be translated into the voltages on each motor, denoted as Va1 and Va2
   Va1 = (sigmaV + deltaV)/2;
@@ -76,7 +76,7 @@ void velocityControl()
   controlSignal_R = abs(controlSignal_R);
   controlSignal_L = abs(controlSignal_L);
   
-      // The tolerance is specified is in t
+  // Unlike what we did in Demo1, this is used to ensure the angular velocity is doing what is intended
       if (abs(errorOfPhiDot) < 0.05)
       {
       Serial.print("  Stopping adjusting angles...    ");
@@ -121,9 +121,6 @@ void velocityControl()
       analogWrite(PWM_OUTPUT_PIN_R, 40);
       analogWrite(PWM_OUTPUT_PIN_L, 40);
       }
-    storedTime = currentTime;
-    storedIntegrator = integrator;
-    storedIntegrator1 = integrator1;
 }
 
 void turnControl ()
