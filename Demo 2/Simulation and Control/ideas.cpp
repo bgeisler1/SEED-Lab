@@ -108,28 +108,6 @@ void velocityControl()
       analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.30);
       analogWrite(PWM_OUTPUT_PIN_L, controlSignal_R*0.30);
       }
-  
-      if (abs(errorOfRhoDot) < 0.001)
-      {
-      Serial.print("  stopped    ");
-      analogWrite(PWM_OUTPUT_PIN_R, 0);
-      analogWrite(PWM_OUTPUT_PIN_L, 0); 
-      }
-      else if (errorOfRhoDot >= 0)
-      {
-      Serial.print("  Running high    ");
-      digitalWrite(7, HIGH); //+
-      digitalWrite(8, HIGH); // -
-      analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.30);
-      analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.30);
-      } else 
-      {
-      Serial.print("  Running low    ");
-      digitalWrite(7, LOW); //+
-      digitalWrite(8, LOW); // -
-      analogWrite(PWM_OUTPUT_PIN_R, 40);
-      analogWrite(PWM_OUTPUT_PIN_L, 40);
-      }
 }
 
 void turnControl ()
