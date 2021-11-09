@@ -88,21 +88,21 @@ void velocityControl()
   // Unlike what we did in Demo1, this is used to ensure the angular velocity is doing what is intended
       if (abs(errorOfPhiDot) < 0.05)
       {
-      Serial.print("  Stopping adjusting angles...    ");
+      Serial.print("  Stopped Rotating...    ");
       analogWrite(PWM_OUTPUT_PIN_R, 0);
       analogWrite(PWM_OUTPUT_PIN_L, 0); 
       
       }
       else if (errorOfPhiDot >= 0)
       {
-      Serial.print("  Turning...   ");
+      Serial.print("  Rotating...   ");
       digitalWrite(7, HIGH); //+
       digitalWrite(8, LOW); // -
       analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.30);
       analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L*0.30);
       } else 
       {
-      Serial.print("  Turning in reverse   ");
+      Serial.print("  Rotating in reverse   ");
       digitalWrite(7, LOW); //+
       digitalWrite(8, HIGH); // -
       analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R*0.30);
