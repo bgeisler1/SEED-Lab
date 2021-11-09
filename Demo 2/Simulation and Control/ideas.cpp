@@ -34,9 +34,18 @@ void maneuvering ()
       // Do nothing otherwise, as we have to make sure it completely stops
     }
     break;
-  case TURNING:
-  
+  case TURN:
+    desiredPhi = transmittedPhi;
+    // Temporarily set desiredRho to be 0 as we do not want the drone to move forward for now... 
+    desiredRho = 0;
+    // Call the turn control function block
+    turnControl();
     break;
+  case DRIVE_FORWARD:
+    desiredPhi = transmittedPhi;
+    desiredRho = transmittedRho;
+    forwardControl();
+  break;
 }
 
 void velocityControl()
