@@ -211,7 +211,7 @@ void turnControl ()
       }
 }
 
-void forwardControl
+void forwardControl()
 {
   //Checks errors for rho, which is part of the outer control loop
   distanceError = desiredRho - currentRho;
