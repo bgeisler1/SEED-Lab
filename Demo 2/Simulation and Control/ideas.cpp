@@ -1,4 +1,4 @@
-enum maneuvering {SEARCH_TAPE,CALIBRATION,TURNING,FORWARD,CIRCLE,WAIT};
+enum maneuvering {SEARCH_TAPE,CALIBRATION,TURN,DRIVE_FORWARD,CIRCLE,WAIT};
 
 maneuvering maneuveringState = SEARCH_TAPE;
 
