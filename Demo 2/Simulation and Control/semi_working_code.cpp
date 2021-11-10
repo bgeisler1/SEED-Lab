@@ -256,7 +256,7 @@ void maneuvering ()
     break;
     
   case DRIVE_FORWARD:
-    desiredPhi = transmittedPhi;
+    desiredPhi = currentPhi;
     desiredRho = transmittedRho;
     forwardControl();
   break;
@@ -402,10 +402,10 @@ void turnControl ()
   
  // These if's will determine if the drone will keep moving forward or correct the angular position if it went off due to friction along the way
       if (abs(positionError) <= 0.05){
-          state = DRIVE_FORWARD;
+          maneuveringState = DRIVE_FORWARD;
           }
       else{
-            state = TURN;
+            maneuveringState = TURN;
         }
       //Serial.print(state);
       // The tolerance is specified is in t
@@ -414,7 +414,6 @@ void turnControl ()
       Serial.print("  Stopping turning...    ");
       analogWrite(PWM_OUTPUT_PIN_R, 0);
       analogWrite(PWM_OUTPUT_PIN_L, 0); 
-      
       }
       else if (positionError >= 0)
       {
@@ -517,5 +516,3 @@ void forwardControl()
   storedIntegrator = integrator;
   storedIntegrator1 = integrator1;
 }
-
-
