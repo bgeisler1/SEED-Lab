@@ -1,6 +1,6 @@
-# define constants
-ALPHA  (17/180) * PI
-H 0.17
+// define constants
+# ALPHA  (17/180) * PI
+# H 0.17
 
 loop()
 {
