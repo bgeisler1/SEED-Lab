@@ -23,30 +23,7 @@ cm instead of directing driving towards the identified marker in order to make i
 
 The general logic of the FSM, as shown in these two key states, is shown below:
 
-  case TURN:
-    // Temporarily set desiredRho to be 0 as we do not want the drone to move forward for now... 
-    desiredRho = 0;
-    // Call the turn control function block
-    turnControl();
-     // These if's will determine if the drone will keep moving forward or correct the angular position if it went off due to friction along the way
-      if (abs(positionError) <= 0.05){
-          maneuveringState = CALIBRATION_FORWARD;
-          }
-      else{
-            maneuveringState = TURN;
-        }
-    break;
-    
-  case CALIBRATION_FORWARD:
-/***  IF LOGIC TO CALIBRATE PARAMETERS ***/
-    maneuveringState = DRIVE_FORWARD;
-  break;
-  case DRIVE_FORWARD:
-    desiredPhi = currentPhi;
-    forwardControl();
-  break;
-  }
-}
+SEARCH STATE(WAITING FOR CV SIGNALS) - TURN CALBIRATION -- TURN STATE (CALL TURN CONTROLLER) -- FORWARD CALIBRATION -- FORWARD STATE (CALL FORWARD CONTROL))
 
 
 
