@@ -1,15 +1,11 @@
-
-
-
-
-
-
-
-
-
-
-
-
+# This code takes a video continuously, 
+# looks for blue, isolates blue with a mask, 
+# displays blue shape by itself continuously 
+# and finds center of shape and displays center as well as the location 
+# of the center of the blue and angle needed to be facing the shape. 
+# Also finds when the tape is about to exit vision of the camera.
+# This code also outputs an angle to an LCD screen.
+# Also the program is to determine whether or not there is tape to begin with.
 
 #importing libraries 
 from picamera import PiCamera 
@@ -21,6 +17,7 @@ import board
 import time 
 import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
 
+# export variables and test variables (not intuitive names)
 jiuzou = 10
 ben = 12
 robert = 100
@@ -218,7 +215,8 @@ while(v.isOpened()):
     if (markersFound == 0):
         vA = 0
         hA = 0
-        
+    
+    # assigning unintuitive variables intuitive values :/
     robert = markersFound
     ben = int(round(hA, 0))
     jiuzou = int(round(vA, 0))
@@ -229,6 +227,7 @@ while(v.isOpened()):
     benNegative = 0
     jiuzouNegative = 0
     
+    # Deciding if variables are negative
     if (ben < 0):
 
         benNegative = 1
@@ -267,7 +266,7 @@ v.release()
 rv.release() 
 cv.destroyAllWindows() 
 
-
+# some comments about variables that CV defined that weren't really used completely 
 
 #totDist is the distance between wheels and center of the tape
 #markersFound is whether or not we see tape
