@@ -186,13 +186,6 @@ void setup() {
 
 void loop() { 
   
-  //desiredPosition = number * PI / 2;
-  
-  //digitalWrite(7, HIGH); //+
-  //digitalWrite(8, LOW); // -
-
-  //analogWrite(PWM_OUTPUT_PIN_R, 0.5*PWM_WAVES_PER_VOLT);
-  //analogWrite(PWM_OUTPUT_PIN_L, 0.5*PWM_WAVES_PER_VOLT);
   time_now = millis(); 
 
   while(millis() < time_now + DELAY){ 
@@ -249,9 +242,9 @@ void mathematics()
 
   if ((abs(benNumber) <= 90) && (abs(jiuzouNumber) <= 90))
   {
-  phi = benNumber*PI/180;
-  theta = jiuzouNumber;
-  transmittedCVInstructions = robertNumber;
+    phi = benNumber*PI/180;
+    theta = jiuzouNumber;
+    transmittedCVInstructions = robertNumber;
   }
 
   if (phi == 0 && theta == 0)
@@ -259,20 +252,11 @@ void mathematics()
     rho = 0;
   }
   else {
-  beta = (PI/2 - (ALPHA*PI/180) - (theta*PI/180) );
-  rho = H * (tan(beta)) - 0.09;
+    beta = (PI/2 - (ALPHA*PI/180) - (theta*PI/180) );
+    rho = H * (tan(beta)) - 0.09;
   }
   beta = (PI/2 - (ALPHA*PI/180) - (theta*PI/180));
   }
-//  Serial.print(robertNumber);
-//  Serial.print("\t");
-//  Serial.print(benNumber);
-//  Serial.print("\t");
-//  Serial.print(jiuzouNumber);
-//  Serial.print("\t");
-//  Serial.print(theta);
-//  Serial.print("\t");
-//  Serial.println(jiuzouNegative);
 }
 
 
@@ -320,19 +304,19 @@ void maneuvering()
     currentPhiDot = RADII/100 * (angular_velocity_R - angular_velocity_L)/(DISTANCE/100);
     if (currentPhiDot == 0)
     {
-    // Reset the parameters for angular positions, have a fresh restart
-    /*angularPos_R  = 0;
-    recorded_position_R = 0;  
-    angularPos_L  = 0;
-    recorded_position_L = 0;
-    positionError = 0;
-    distanceError = 0;
-    errorOfRhoDot = 0;
-    errorOfPhiDot = 0; */
-    transmittedPhi = phi;
-    transmittedRho = rho;
-    desiredPhi = currentPhi+ (-0.60*transmittedPhi);
-    maneuveringState = TURN;
+        // Reset the parameters for angular positions, have a fresh restart
+        /*angularPos_R  = 0;
+        recorded_position_R = 0;  
+        angularPos_L  = 0;
+        recorded_position_L = 0;
+        positionError = 0;
+        distanceError = 0;
+        errorOfRhoDot = 0;
+        errorOfPhiDot = 0; */
+        transmittedPhi = phi;
+        transmittedRho = rho;
+        desiredPhi = currentPhi+ (-0.60*transmittedPhi);
+        maneuveringState = TURN;
     } else
     {
       // Do nothing otherwise, as we have to make sure it completely stops
@@ -367,12 +351,12 @@ void maneuvering()
   case CALIBRATION_FORWARD:
     if (transmittedRho >= 0.20)
     {
-     desiredRho = currentRho + 0.20;
+      desiredRho = currentRho + 0.20;
     }
     else 
     {
     transmittedRho = rho;
-    desiredRho = currentRho + transmittedRho;
+      desiredRho = currentRho + transmittedRho;
     }
     maneuveringState = DRIVE_FORWARD;
   break;
@@ -383,78 +367,6 @@ void maneuvering()
   break;
   }
 }
-
-//void velocityControl()
-//{
-//  currentTime = millis();
-//  samplingTime = currentTime - storedTime;
-//  absOfangularPos_R = - angularPos_R;
-//
-//  
-//  currentRho = RADII/100 * (absOfangularPos_R + angularPos_L)/2;
-//  currentPhi = RADII/100 * (absOfangularPos_R - angularPos_L)/(DISTANCE/100);
-//  //Calculations for velocities, which are all done in standard SUI units. No cm's or inches
-//  currentRhoDot = RADII/100 * (angular_velocity_R + angular_velocity_L)/2;
-//  currentPhiDot = RADII/100 * (angular_velocity_R - angular_velocity_L)/(DISTANCE/100);
-//  
-//  errorOfRhoDot = desiredRhoDot - currentRhoDot;
-//  errorOfPhiDot = desiredPhiDot - currentPhiDot;
-//  
-// // The theoretically-usable I portion of the controller, which wa not used in this case
-//  integrator =  storedIntegrator + errorOfRhoDot * (samplingTime/1000);
-//  integrator1 = storedIntegrator1 + errorOfPhiDot * (samplingTime/1000);
-//
-// // sum and delta will be calculated accordingly
-//  sigmaV = 0; // No sum voltage will be applied as it shoukd be just turning
-//  deltaV = KpPhi * errorOfPhiDot;
-//  // The aforementioned voltages will be translated into the voltages on each motor, denoted as Va1 and Va2
-//  Va1 = (sigmaV + deltaV)/2;
-//  Va2 = (sigmaV - deltaV)/2;
-//  // The voltages will then be translated into the actual PWM waves using the pwm_waves_per_volt constant
-//  controlSignal_R = Va1 * PWM_WAVES_PER_VOLT;
-//  controlSignal_L = Va2 * PWM_WAVES_PER_VOLT;
-//  
-//  if (abs(controlSignal_R) > PWM_BOUND) 
-//  { 
-//    controlSignal_R = constrain(controlSignal_R, -1, 1) * PWM_BOUND; 
-//    errorOfRhoDot = constrain (errorOfRhoDot, -1, 1) * min(abs(errorOfRhoDot), PWM_BOUND / KpRho); 
-//  } 
-//  if (abs(controlSignal_L) > PWM_BOUND)
-//  {
-//    controlSignal_L = constrain(controlSignal_L, -1, 1) * PWM_BOUND;
-//    errorOfPhiDot = constrain (errorOfPhiDot, -1, 1) * min(abs(errorOfPhiDot), PWM_BOUND / KpPhi);
-//  }
-// 
-//  controlSignal_R = abs(controlSignal_R);
-//  controlSignal_L = abs(controlSignal_L);
-//  
-//  // Unlike what we did in Demo1, this is used to ensure the angular velocity is doing what is intended
-//      if (abs(errorOfPhiDot) < 0.05)
-//      {
-//      Serial.print("  Stopped Rotating...    ");
-//      analogWrite(PWM_OUTPUT_PIN_R, 0);
-//      analogWrite(PWM_OUTPUT_PIN_L, 0); 
-//      
-//      }
-//      else if (errorOfPhiDot >= 0)
-//      {
-//      //Serial.println("  Rotating...   ");
-//      digitalWrite(7, HIGH); //+
-//      digitalWrite(8, LOW); // -
-//      analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R);
-//      analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L);
-//      } else 
-//      {
-//      Serial.println("  Rotating in reverse   ");
-//      digitalWrite(7, LOW); //+
-//      digitalWrite(8, HIGH); // -
-//      analogWrite(PWM_OUTPUT_PIN_R, controlSignal_R);
-//      analogWrite(PWM_OUTPUT_PIN_L, controlSignal_L);
-//      }
-//  storedTime = currentTime;
-//  storedIntegrator = integrator;
-//  storedIntegrator1 = integrator1;
-//}
 
 void turnControl ()
 {
@@ -628,22 +540,6 @@ void forwardControl()
   storedIntegrator1 = integrator1;
 }
 
-// callback for received data
-//void receiveData(int byteCount){
-//  int data[5];
-//  int i = 0;
-//  while(Wire.available()){
-//    data[i] = Wire.read();
-//    i++;
-//  }
-//  robertNumber = data[0];//markersFound
-//  benNumber = data[1];//hA
-//  benNegative = data[2];//Accounts for negative or positive
-//  jiuzouNumber  = data [3];//vA
-//  jiuzouNegative = data[4];//Accounts for negative or positive
-//  imReady = 0; //This sets the flag to zero so that pi knows the arduino is using that data
-//}
-//}
 
 void receiveData(int byteCount)
 { //Serial.println("In receiveData() ");
