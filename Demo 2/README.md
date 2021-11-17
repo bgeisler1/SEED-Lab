@@ -7,10 +7,25 @@ Robert Schmidt
 Louie Heilweil
 
 This document contains descriptions of the code and tasks used in to create Demo 2.
+Note that the final code used for the demo is called Final_Code.ino which is in the Simulation and Control file
 
 ---------------------------------------------------------------------------------------------------------------
 Localization
 --
+For this demo, the main localization focus was verifying that the robot would navigate correctly when given the values from computer vision.
+It was important to communicate with computer vision for this portion of the project so we could determine what values to send over from
+the Raspberry Pi to the Arduino. We determined that we would need a vertical angle from camera to the tape, which was based on the height of the robot,
+as well as the horizontal angle from the camera, so that we could determine how much the robot needed to turn. A boolean was also to be
+sent, so that the robot would know when the tape was within view, and would stop searching. The vertical angle was used to determine how far away
+the tape was, and the horizontal angle was used to determine the angle the robot would have to turn. The calculations given the vertical angle (theta) are
+shown below, where ALPHA is the angle of the camera, and H is the height of the robot:
+
+beta = (PI/2 - (ALPHA*PI/180) - (theta*PI/180) );
+rho = H * (tan(beta)) - 0.09;
+  
+If the angle was positive, it would move clockwise, and if it was negative, it would turn counterclockwise. Calculating these essentially gave 
+us the inputs we needed to move to any point of blue tape, using the control system from Demo 1 and the state machine for this demo. 
+
 
 ---------------------------------------------------------------------------------------------------------------
 Simulation and Control
