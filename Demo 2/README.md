@@ -30,6 +30,7 @@ SEARCH STATE(WAITING FOR CV SIGNALS) - TURN CALBIRATION -- TURN STATE (CALL TURN
 ---------------------------------------------------------------------------------------------------------------
 Computer Vision
 --
+The Computer Vision subsystem is responsible for obtaining both the horizontal and vertical angles as well, as whether or not they are negitive, rounding the angles to the nearest integer for system intergration purposes, and also deciding whether or not the end of the tape is at the bottom of the vision of the camera. The program is supposed to recognize blue painters tape and recognize these values.
 
 ---------------------------------------------------------------------------------------------------------------
 System Integration
