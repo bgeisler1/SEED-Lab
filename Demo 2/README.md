@@ -7,7 +7,7 @@ Robert Schmidt
 Louie Heilweil
 
 This document contains descriptions of the code and tasks used in to create Demo 2.
-Note that the final code used for the demo is called Final_Code.ino which is in the Simulation and Control file
+Note that the final code used for the demo is called Final_Code.ino, which is in the Simulation and Control folder.
 
 ---------------------------------------------------------------------------------------------------------------
 Localization
