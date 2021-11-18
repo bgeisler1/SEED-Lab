@@ -145,8 +145,9 @@ float recorded_time = 0;
 const float Kp = 0.643661597696071; 
 const float Ki = 0.0749866625772769;  
 
-
+// These are the enumerated states for the state machine
 enum maneuvering {SEARCH_TAPE,CALIBRATION_TURN,TURN,DRIVE_FORWARD,CALIBRATION_FORWARD,WAIT,WAIT_TURN};
+// Set the default state to SEARCH_TAPE
 maneuvering maneuveringState = SEARCH_TAPE;
 int transmittedCVInstructions = 0;
 float transmittedRho = (3 * 0.3048) - 0.03;
@@ -349,13 +350,16 @@ void maneuvering()
     break;
     
   case CALIBRATION_FORWARD:
+      // This specific state will calibrate and set the parameters for the forward state (only once)
     if (transmittedRho >= 0.20)
     {
+      // The desired value of Rho is set to be 20cm for incremental movements
       desiredRho = currentRho + 0.20;
     }
     else 
     {
-    transmittedRho = rho;
+      // If the transmittedRho is within 20cm, just move that desired distance
+      transmittedRho = rho;
       desiredRho = currentRho + transmittedRho;
     }
     maneuveringState = DRIVE_FORWARD;
@@ -368,7 +372,7 @@ void maneuvering()
   }
 }
 
-void turnControl ()
+void turnControl ()  // This turn controller is decoupled and will only turn upon request
 {
   currentTime = millis();
   samplingTime = currentTime - storedTime;
@@ -457,7 +461,7 @@ void turnControl ()
   storedIntegrator1 = integrator1;
 }
 
-void forwardControl()
+void forwardControl()  // This controller is not decoupled and will move forward and adjust the angle along the way
 {
   currentTime = millis();
   samplingTime = currentTime - storedTime;
@@ -540,7 +544,7 @@ void forwardControl()
   storedIntegrator1 = integrator1;
 }
 
-
+// The case switch statement inside this specific ISR will transmit these data one by one/
 void receiveData(int byteCount)
 { //Serial.println("In receiveData() ");
   switch (transmissionState){
@@ -572,7 +576,7 @@ void receiveData(int byteCount)
     while(Wire.available()){
     jiuzouNegative = Wire.read();
       }
-  transmissionState = 0;
+  transmissionState = 0; // Reset the state machine to case 0 once the sequence is completed
   break;
   }
 }
