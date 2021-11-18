@@ -36,7 +36,7 @@ position. As our computer vision takes a relatively long time to read in and ana
 seconds is needed to prevent the robot of going over and not seeing the tape. The moving distance is also of a set distance of 20-30
 cm instead of directing driving towards the identified marker. This can make infinitesimally closer approaches to the center of the tape and drive along it.
 
-The general logic of the FSM, as shown in these two key states, is shown below:
+The general logic of the FSM, as shown in these key states, is shown below:
 
 SEARCH STATE(WAITING FOR CV SIGNALS) - TURN CALBIRATION -- TURN STATE (CALL TURN CONTROLLER) -- FORWARD CALIBRATION -- FORWARD STATE (CALL FORWARD CONTROL))
 
