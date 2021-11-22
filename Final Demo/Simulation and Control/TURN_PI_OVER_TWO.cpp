@@ -1,7 +1,6 @@
 /* 
 Arduino Code Demo 1 - Group 9
 Ben Geisler, Jiuzou Zhang, Robert Schmidt 
-
 The basic setup of this code is to convert desired distances/angles into the corresponding speeds using the outer loop PD controller, which will set specified
 speeds and translate the values into voltage readings and then PWM waves using the inner loop P controller. The outer and inner loop controllers were modeled
 using the simulink models and transfer function identifications by setting up the step experiments with decoupling effects. But nonetheless the speeds were
@@ -145,13 +144,15 @@ const float Kp = 0.643661597696071;
 const float Ki = 0.0749866625772769;  
 
 // These are the enumerated states for the state machine
-enum maneuvering {SEARCH_TAPE,CALIBRATION_TURN,TURN,DRIVE_FORWARD,CALIBRATION_FORWARD,WAIT,WAIT_TURN,TURN_PI_OVER_TWO};
+enum maneuvering {SEARCH_TAPE,CALIBRATION_TURN,TURN,DRIVE_FORWARD,CALIBRATION_FORWARD,WAIT,WAIT_TURN,TURN_PI_OVER_TWO,TURN_PI_OVER_TWO_CALIBRATION};
 // Set the default state to SEARCH_TAPE
 maneuvering maneuveringState = SEARCH_TAPE;
 int transmittedCVInstructions = 0;
 int wentOverCounter = 0;
 float transmittedRho = (3 * 0.3048) - 0.03;
 float transmittedPhi = (-PI/2) * 1.07;
+
+bool doNotRun = false;
 
 // Setup encoder - pins 2 (interrupt) and 5 (no interrupt) 
 Encoder motorEncR(ENCODER_PIN_A, ENCODER_PIN_B); 
@@ -301,9 +302,9 @@ void maneuvering()
     {
       maneuveringState = CALIBRATION_TURN;
     }
-    else if (transmittedCVInstructions == 0 && wentOverCounter < 3)
+    else if (transmittedCVInstructions == 0 && wentOverCounter < 3 && doNotRun == false)
     {
-      maneuveringState = TURN_PI_OVER_TWO;
+      maneuveringState = TURN_PI_OVER_TWO_CALIBRATION;
       wentOverCounter++;
     }
     else
@@ -328,7 +329,7 @@ void maneuvering()
         errorOfPhiDot = 0; */
         transmittedPhi = phi;
         transmittedRho = rho;
-        desiredPhi = currentPhi+ (-0.60*transmittedPhi);
+        desiredPhi = currentPhi+ (-0.80*transmittedPhi);
         maneuveringState = TURN;
     } else
     {
@@ -381,11 +382,16 @@ void maneuvering()
     desiredPhi = currentPhi;
     forwardControl();
   break;
+  case TURN_PI_OVER_TWO_CALIBRATION:
+  desiredPhi = currentPhi - 0.6*(PI/2);
+  maneuveringState = TURN_PI_OVER_TWO;
+  break;
+  
   // Hard code the PI/2 turns in case the CV failed to pick up new signals    
   case TURN_PI_OVER_TWO:
-      desiredPhi = currentPhi - PI/2;
       turnControl();
       if (abs(positionError) <= 0.05){
+          doNotRun = true;
           maneuveringState = WAIT_TURN;
           }
       else{
@@ -545,6 +551,7 @@ void forwardControl()  // This controller is not decoupled and will move forward
       Serial.print("  stopped    ");
       analogWrite(PWM_OUTPUT_PIN_R, 0);
       analogWrite(PWM_OUTPUT_PIN_L, 0);
+      doNotRun = false;
       maneuveringState = WAIT_TURN; 
       }
       else if (distanceError >= 0)
