@@ -305,7 +305,7 @@ void maneuvering()
     while(millis() < time_now + 6000 ){     
       // Wait approx. [period] ms 
     }  
-    if (transmittedCVInstructions == 1)
+    if (transmittedCVInstructions == 1 && wentOverCounter < 3)
     {
       maneuveringState = CALIBRATION_TURN;
     }
