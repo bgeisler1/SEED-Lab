@@ -144,7 +144,7 @@ const float Kp = 0.643661597696071;
 const float Ki = 0.0749866625772769;  
 
 // These are the enumerated states for the state machine
-enum maneuvering {SEARCH_TAPE,CALIBRATION_TURN,TURN,DRIVE_FORWARD,CALIBRATION_FORWARD,WAIT,WAIT_TURN,TURN_PI_OVER_TWO,TURN_PI_OVER_TWO_CALIBRATION};
+enum maneuvering {SEARCH_TAPE,CALIBRATION_TURN,TURN,DRIVE_FORWARD,CALIBRATION_FORWARD,WAIT,WAIT_TURN,TURN_PI_OVER_TWO,TURN_PI_OVER_TWO_CALIBRATION,FINAL_PUSH};
 // Set the default state to SEARCH_TAPE
 maneuvering maneuveringState = SEARCH_TAPE;
 int transmittedCVInstructions = 0;
@@ -295,8 +295,15 @@ void maneuvering()
     break;
 
     case WAIT_TURN:
+    /******* Updated on November 30th, a final push of 3 ft. *******/
+    if (wentOverCounter == 3)
+    {
+      desiredRho = currentRho + 3 * 0.3048;
+      maneuveringState = FINAL_PUSH;
+    }
+    /******* End of the update. *******/
     while(millis() < time_now + 6000 ){     
-      //wait approx. [period] ms 
+      // Wait approx. [period] ms 
     }  
     if (transmittedCVInstructions == 1)
     {
@@ -397,7 +404,11 @@ void maneuvering()
       else{
           maneuveringState = TURN_PI_OVER_TWO;
         }
-  break;    
+  break;
+      
+    case FINAL_PUSH:
+      forwardControl();
+      break;
   }
 }
 
