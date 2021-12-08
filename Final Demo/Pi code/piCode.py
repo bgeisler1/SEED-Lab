@@ -5,10 +5,6 @@
 # of the center of the bliue and angle needed to be facing the shape. 
 # Also finds quadrant of blue shape and shares information with an Arduino. 
 
- # defining and initializing the export variable 
-
-
-#tapeFound = 0
 
 
 #importing libraries 
@@ -21,6 +17,7 @@ import board
 import time 
 import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
 
+#defining global variables
 
 crossFound = 0
 rightTurn = 0
@@ -108,7 +105,8 @@ while(v.isOpened()):
             hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV) 
             gr = cv.cvtColor(frame, cv.COLOR_BGR2GRAY) 
      
-            # defining yellow and mask as well as resulting isolated shape plus testing some other ranges
+            # defining blue and mask as well as resulting isolated shape plus testing some other ranges
+      
             #yellow
             #lower = np.array([15, 100, 100], dtype = "uint8") 
             #upper = np.array([30, 255, 255], dtype = "uint8") 
@@ -134,28 +132,16 @@ while(v.isOpened()):
             img_gray = cv.morphologyEx(img_gray, cv.MORPH_CLOSE, kernal)
             thresh, binary_img = cv.threshold(img_gray, thresh = 0, maxval = 255, type = cv.THRESH_BINARY + cv.THRESH_OTSU)
             
-            #ret, thresh = cv.threshold (img_gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
-            #opening1 = cv.morphologyEx(output, cv.MORPH_OPEN, kernal)
-            #blur = cv.GaussianBlur(opening1, (5, 5), 0)
-            #opening2 = cv.morphologyEx(opening1, cv.MORPH_OPEN, kernal)
-            #opening3 = cv.morphologyEx(opening2, cv.MORPH_OPEN, kernal)
-            #opening4 = cv.morphologyEx(opening3, cv.MORPH_OPEN, kernal) 
-            # finding and drawing contours for fancy highlights and center of shape 
-            #img_gray = cv.cvtColor(opening1, cv.COLOR_BGR2GRAY)
             
             num_white_labels, labels_white_img = cv.connectedComponents(binary_img)
             
             labels_display = cv.normalize(src = labels_white_img, dst = None, alpha = 0, beta = 255, norm_type = cv.NORM_MINMAX, dtype = cv.CV_8U)
-            #mask = cv.inRange(hsv, lower, upper)
+
             mask = cv.inRange(binary_img, 100, 255)
             output = cv.bitwise_and(frame, frame, mask = mask)
-            #mask = cv.inRange(output, lower, upper) 
-            #output = cv.bitwise_and(frame, frame, mask = mask) 
-            #ret, thresh = cv.threshold(img_gray, 50, 255,cv.THRESH_BINARY) #used mask originally
-            #ret, thresh = cv.threshold (labels_display, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
+
             imageo, contours, hierarchy = cv.findContours(binary_img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE) 
-            #image2 = cv.drawContours(output, contours, 0, (0,0,255),2) #used output originally
-            
+
             image2 = cv.drawContours(output, contours, 0, (0,0,255),2)
 
             # finding center and angle of shape is there is actually a shape 
@@ -164,15 +150,13 @@ while(v.isOpened()):
                 My = cv.moments(contours[0]) 
                 try: 
                     cv.circle(output, (round(My['m10'] / My['m00']), round(My['m01'] / My['m00'])), 3, (0, 0, 255), -1)
-                    #cv.circle(output, (round(My['m00']) , round(My['m01'] / My['m00'])), 3, (0, 255, 255), -1)
-                    #cv.circle(output, (round(My['m10']), round(My['m01'])), 3, (0, 0, 255), -1)
-                    #cv.imshow('frame', output)
+
                     cv.imshow('frame', output) 
                     rv.write(output) 
                     #print("Center of X: '{}'".format(round(My['m10'] / My['m00']))) 
                     #print("Center of Y: '{}'".format(round(My['m01'] / My['m00'])))
                     markersFound = 1
-    # Making case statements to find which quadrant the center of the yellow hexagon is in and assigning it to the  
+    # Making case statements to find which quadrant the center of the blue is in and assigning it to the  
     # export variable.                 
 
                     if (round(My['m10'] / My['m00']) > 320) and (round(My['m01'] / My['m00']) < 240): 
@@ -188,7 +172,7 @@ while(v.isOpened()):
                         quad = 4 
                         #print("Quandrant: ", quad)
                         
-                        
+                        # Finding some other values that were not really used
                         
                     if (round(My['m10'] / My['m00']) < 100) and (round(My['m10'] / My['m00']) > 380):
                         crossFound = 1
