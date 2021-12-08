@@ -24,7 +24,8 @@ The main task for simulation and control is to
 ---------------------------------------------------------------------------------------------------------------
 Computer Vision
 --
-The Computer Vision subsystem is responsible for 
+The Computer Vision subsystem is responsible for recognizing blue tape and assigning angle values to variables 
+to be outputted to the arduino by system integration.
 
 ---------------------------------------------------------------------------------------------------------------
 System Integration
