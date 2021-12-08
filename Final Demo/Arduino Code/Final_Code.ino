@@ -1,5 +1,5 @@
 /* 
-Arduino Code Demo 1 - Group 9
+Arduino Code Final Project - Group 9
 Ben Geisler, Jiuzou Zhang, Robert Schmidt 
 The basic setup of this code is to convert desired distances/angles into the corresponding speeds using the outer loop PD controller, which will set specified
 speeds and translate the values into voltage readings and then PWM waves using the inner loop P controller. The outer and inner loop controllers were modeled
