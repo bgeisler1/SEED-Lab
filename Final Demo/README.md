@@ -23,8 +23,8 @@ turn), which is further discussed in simulation and control.
 ---------------------------------------------------------------------------------------------------------------
 Simulation and Control
 --
-The main task for simulation and control is to update the state machine so that once the robot detects the ninety degree turn,
-it can proceed to the dedeicated turn state and complete the task. Additionally, some fine tuning of the controller parameters
+The main task for simulation and control is to update the state machine so that once the robot detects the ninety degree turn,or loses its sight
+it can proceed to the dedeicated turn state and complete the task after a custom delay of 2s (which is used to make sure it is not picking up new values). Additionally, some fine tuning of the controller parameters
 is also done to make sure the calculated distance and the actual moving distance are as close as possible. Some customer scaling
 factors were also added to adpt to different battery voltages in case the robot over or undershoots in the turn state.
 
