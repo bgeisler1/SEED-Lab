@@ -1,9 +1,9 @@
 # This code takes a video continuously, 
-# looks for yellow, isolates yellow with a mask, 
-# displays yellow shape by itself continuously 
+# looks for blue, isolates blue with a mask, 
+# displays blue shape by itself continuously 
 # and finds center of shape and displays center as well as the location 
-# of the center of the yellow and angle needed to be facing the shape. 
-# Also finds quadrant of hexagon and shares information with an Arduino. 
+# of the center of the blue and angle needed to be facing the shape. 
+# Also finds quadrant of blue and shares information with an Arduino. 
 
  # defining and initializing the export variable 
 
