@@ -1,4 +1,4 @@
-Descriptions of Demo 2
+Descriptions of Final Demo
 ---------------------------------------------------------------------------------------------------------------
 
 Ben Geisler
@@ -32,7 +32,7 @@ factors were also added to adpt to different battery voltages in case the robot 
 ---------------------------------------------------------------------------------------------------------------
 Computer Vision
 --
-The Computer Vision subsystem is responsible for 
+The Computer Vision subsystem is responsible for recognizing blue painters tape and isolating the tape in its environment. The center of the tape, and the angle of the tape with  respect to the camera is found and assigned to variables that are exported to the control subsystem. The code is also capable of finding when the tape is at the vision limit of the screen.
 
 ---------------------------------------------------------------------------------------------------------------
 System Integration
