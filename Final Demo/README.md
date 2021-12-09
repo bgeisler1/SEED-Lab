@@ -7,7 +7,7 @@ Robert Schmidt
 Louie Heilweil
 
 This document contains descriptions of the code and tasks used in to create the Final Demo.
-Note that the final code used for the demo is called Final_Code.ino, which is in the Simulation and Control folder.
+Note that the final code used for the demo is called Final_Code.ino, which is in the Arduino Code folder.
 
 ---------------------------------------------------------------------------------------------------------------
 Localization
